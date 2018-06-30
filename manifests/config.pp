@@ -9,6 +9,7 @@ class spacewalk::config (
         $spacewalkchannels = 'centos-7.3',
 ) {
 
+  # Enforce rhn_client checkin interval 
      $spacewalk_checkin_interval = 'INTERVAL=60'
      # update file rhnsd
      file { "/etc/sysconfig/rhn/rhnsd":
@@ -24,7 +25,8 @@ class spacewalk::config (
        ensure  => "running",
        enable  => "true",
                   }
-
+   # Register system into spacewalk , with the respective activation keys for groups 
+   #, channels and puppet environment 
         $channel_labels= $spacewalkchannels.join('\|')
         if $facts['os']['name'] =='Ubuntu'{
                 exec { "Register client with spacewalk Server $channel_labels":
@@ -79,12 +81,10 @@ class spacewalk::config (
 
                 else  {
 
-                 
                  file { '/usr/share/rhn/RHNS-CA-CERT':
                      source => 'puppet:///modules/spacewalk/RHN-ORG-TRUSTED-SSL-CERT',
                      mode  => '0640',
                        }
-
 
                 cron { 'auto_rhn_check_rhel':
                   command => '/usr/sbin/rhn_check -v  > /dev/null 2>&1',
@@ -95,16 +95,14 @@ class spacewalk::config (
 
                      }
 
-
                         }
-
- 
               }
-
+              
+# Deliver the spacewalk Certificate for automation between the server and the client 
+              
               file { '/usr/share/rhn/RHN-ORG-TRUSTED-SSL-CERT':
               source => 'puppet:///modules/spacewalk/RHN-ORG-TRUSTED-SSL-CERT',
               mode  => '0640',
                    }
-
 }   
 
