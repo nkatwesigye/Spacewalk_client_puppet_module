@@ -60,14 +60,15 @@ class spacewalk::config (
 
                         }   
        else {
-
+# Register system into spacewalk , with the respective activation keys for groups 
+#, channels and puppet environment for Centos & RHEL systems
                 exec { "Register client with spacewalk Server $channel_labels":
                   command => "/usr/sbin/rhnreg_ks --serverUrl=http://${spacewalk_server}/XMLRPC \
                   --activationkey=${osflavour_key},${envapp_key},${datacenter_key} \
                   --force  --profile=`hostname -f `",
                   unless => ["/usr/sbin/rhn-channel -l | grep \"${channel_labels}\""],
                       } 
-                
+ # Cron job for 5 minutes checkin on RHEL & Centos systems               
                 if ($facts['operatingsystem'] == 'Centos') and ($facts['operatingsystemmajrelease'] == '7') {
                 cron { 'auto_rhn_check_rhel':
                   command => '/sbin/rhn_check -v  > /dev/null 2>&1',
